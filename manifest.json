@@ -1,0 +1,42 @@
+{
+  "name": "Sri KP Fitness Center",
+  "short_name": "SKP Fitness",
+  "description": "Gym management system for Sri KP Fitness Center",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#090909",
+  "theme_color": "#D4AF37",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "health", "fitness"],
+  "shortcuts": [
+    {
+      "name": "Members",
+      "url": "./app.html#/members",
+      "description": "View all members"
+    },
+    {
+      "name": "Fee Collection",
+      "url": "./app.html#/fees",
+      "description": "Collect membership fees"
+    },
+    {
+      "name": "Attendance",
+      "url": "./app.html#/attendance",
+      "description": "Mark attendance"
+    }
+  ]
+}

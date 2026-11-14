@@ -1,0 +1,87 @@
+/* ==========================================================================
+   SRI KP FITNESS CENTER — Design Tokens
+   Premium Black & Gold Design System
+   ========================================================================== */
+
+:root {
+  /* Surfaces */
+  --bg-main: #090909;
+  --bg-sidebar: #0D0D0D;
+  --bg-card: #151515;
+  --bg-card-2: #1C1C1C;
+  --bg-elevated: #222222;
+  --bg-input: #0E0E0E;
+
+  /* Gold palette */
+  --gold: #D4AF37;
+  --gold-bright: #F5D76E;
+  --gold-dark: #9C7623;
+  --gold-soft: rgba(212, 175, 55, 0.12);
+  --gold-glow: rgba(212, 175, 55, 0.25);
+  --gold-border: rgba(212, 175, 55, 0.35);
+
+  /* Text */
+  --text-primary: #FFFFFF;
+  --text-secondary: #A7A7A7;
+  --text-muted: #6E6E6E;
+
+  /* Status */
+  --success: #2ECC71;
+  --warning: #F5A623;
+  --danger: #EF5350;
+  --info: #4FC3F7;
+
+  /* Gradients */
+  --gold-gradient: linear-gradient(135deg, #F5D76E 0%, #D4AF37 50%, #9C7623 100%);
+  --gold-gradient-soft: linear-gradient(135deg, rgba(245, 215, 110, 0.15) 0%, rgba(156, 118, 35, 0.05) 100%);
+  --dark-gradient: linear-gradient(145deg, #1C1C1C 0%, #0D0D0D 100%);
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.65);
+  --shadow-gold: 0 4px 24px rgba(212, 175, 55, 0.18);
+  --shadow-gold-strong: 0 6px 32px rgba(212, 175, 55, 0.35);
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+
+  /* Spacing scale */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+
+  /* Typography */
+  --font-display: 'Playfair Display', 'Georgia', serif;
+  --font-body: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Menlo', monospace;
+
+  --fs-xs: 11px;
+  --fs-sm: 13px;
+  --fs-md: 14px;
+  --fs-lg: 16px;
+  --fs-xl: 20px;
+  --fs-2xl: 26px;
+  --fs-3xl: 34px;
+  --fs-4xl: 44px;
+
+  /* Layout */
+  --sidebar-w: 260px;
+  --sidebar-w-collapsed: 72px;
+  --header-h: 72px;
+
+  /* Motion */
+  --t-fast: 160ms cubic-bezier(.4,0,.2,1);
+  --t-base: 240ms cubic-bezier(.4,0,.2,1);
+  --t-slow: 400ms cubic-bezier(.4,0,.2,1);
+}

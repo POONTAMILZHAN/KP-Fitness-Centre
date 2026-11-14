@@ -1,0 +1,39 @@
+/* ==========================================================================
+   Global Responsive Overrides
+   ========================================================================== */
+
+@media (max-width: 1200px) {
+  :root { --sp-8: 24px; --sp-10: 28px; }
+}
+
+@media (max-width: 900px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .page-head { flex-direction: column; align-items: flex-start; }
+  .collect-grid, .profile-grid, .dash-grid { grid-template-columns: 1fr; }
+  .brand-features { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  :root { --fs-2xl: 22px; --fs-3xl: 28px; --fs-4xl: 34px; }
+  .modal-head, .modal-body, .modal-footer { padding-left: 20px; padding-right: 20px; }
+  .card { padding: 18px; }
+  .metric-card { padding: 18px; }
+  .metric-card .metric-value { font-size: 28px; }
+  .metric-card .metric-icon { width: 36px; height: 36px; font-size: 16px; }
+  .welcome-banner { padding: 20px; }
+  .filter-bar .search-input { max-width: 100%; }
+  .quick-action-grid { grid-template-columns: 1fr; }
+  .brand-hero h1 { font-size: 38px; }
+}
+
+@media (max-width: 420px) {
+  .page-head .page-actions { width: 100%; }
+  .page-head .page-actions .btn { flex: 1; }
+  .modal-footer { flex-direction: column-reverse; }
+  .modal-footer .btn { width: 100%; }
+}
+
+/* High DPI tweaks */
+@media (min-resolution: 2dppx) {
+  body { -webkit-font-smoothing: subpixel-antialiased; }
+}

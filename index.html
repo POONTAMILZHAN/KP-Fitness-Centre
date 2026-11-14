@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#090909">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SKP Fitness">
+  <link rel="manifest" href="manifest.json">
+  <title>Sign In — Sri KP Fitness Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/login.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <main class="login-page">
+    <!-- Left: Brand hero -->
+    <section class="login-brand">
+      <div class="brand-logo">
+        <div class="mark">SKP</div>
+        <div class="name">Sri KP Fitness<span>GYM MANAGEMENT SYSTEM</span></div>
+      </div>
+
+      <div class="brand-hero">
+        <div class="eyebrow">Premium · Luxury Fitness</div>
+        <h1>
+          Elevate Every
+          <span class="gold">Repetition.</span>
+        </h1>
+        <p>Where ambition meets discipline. Sri KP Fitness Center brings a next-generation experience to member management — crafted with refinement, built for performance.</p>
+
+        <div class="brand-features">
+          <div class="feature">
+            <div class="ico">⚡</div>
+            <div class="txt">Lightning Fast<small>Local-first, offline-ready</small></div>
+          </div>
+          <div class="feature">
+            <div class="ico">🔒</div>
+            <div class="txt">Fully Private<small>Your data stays on your device</small></div>
+          </div>
+          <div class="feature">
+            <div class="ico">📊</div>
+            <div class="txt">Insightful<small>Live metrics &amp; reports</small></div>
+          </div>
+          <div class="feature">
+            <div class="ico">✨</div>
+            <div class="txt">Premium Design<small>Crafted for operators</small></div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="brand-footer">
+        <span>MATHAMPALAYAM · PULIAMPATTI · ERODE</span>
+        <span class="hours">OPEN 5:00 AM – 10:00 PM</span>
+      </footer>
+    </section>
+
+    <!-- Right: Sign-in -->
+    <section class="login-panel">
+      <div class="login-card fade-in">
+        <div class="section-title" style="margin-bottom: 0">
+          <div>
+            <h2>Welcome Back</h2>
+            <p class="subtitle">Manage your fitness business with confidence.</p>
+          </div>
+        </div>
+
+        <!-- Sign-in form -->
+        <form id="login-form" novalidate style="margin-top: 32px;">
+          <div class="login-error hidden" id="login-error"></div>
+
+          <div class="form-group" style="margin-bottom: 18px;">
+            <label for="username">Username</label>
+            <input id="username" name="username" class="input" type="text" autocomplete="username" required placeholder="e.g. owner">
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <div class="password-wrap">
+              <input id="password" name="password" class="input" type="password" autocomplete="current-password" required placeholder="Enter your password">
+              <button type="button" class="toggle-eye" id="toggle-eye" aria-label="Show password">Show</button>
+            </div>
+          </div>
+
+          <div class="login-options">
+            <label class="checkbox">
+              <input type="checkbox" id="remember" checked>
+              Remember username
+            </label>
+            <span class="forgot" id="forgot-link">Forgot password?</span>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block btn-lg" id="login-btn">
+            <span id="login-btn-text">Sign In Securely</span>
+          </button>
+
+          <div class="setup-note hidden" id="setup-note">
+            <strong style="color: var(--gold)">First time here?</strong><br>
+            Set up the admin account below to get started.
+          </div>
+        </form>
+
+        <!-- Setup form (hidden by default) -->
+        <form id="setup-form" class="hidden" novalidate style="margin-top: 32px;">
+          <div class="login-error hidden" id="setup-error"></div>
+
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label for="setup-name">Your Name</label>
+            <input id="setup-name" class="input" type="text" required placeholder="e.g. Admin Name">
+          </div>
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label for="setup-username">Choose a Username</label>
+            <input id="setup-username" class="input" type="text" required placeholder="e.g. owner">
+          </div>
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label for="setup-password">Create a Password</label>
+            <input id="setup-password" class="input" type="password" required placeholder="Minimum 6 characters">
+          </div>
+          <div class="form-group" style="margin-bottom: 24px;">
+            <label for="setup-password2">Confirm Password</label>
+            <input id="setup-password2" class="input" type="password" required placeholder="Re-enter password">
+          </div>
+          <button type="submit" class="btn btn-primary btn-block btn-lg">Create Admin Account</button>
+          <div class="setup-note" style="margin-top: 16px;">
+            This account will be stored locally in your browser.<br>
+            Please remember these credentials carefully.
+          </div>
+        </form>
+
+        <div class="login-footer">
+          <strong>SRI KP FITNESS CENTER</strong><br>
+          GYM MANAGEMENT SYSTEM v1.0<br>
+          <span style="color: var(--gold);">+91 99622 59269</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast-stack"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    (async function init() {
+      const loginForm = U.$('#login-form');
+      const setupForm = U.$('#setup-form');
+      const loginError = U.$('#login-error');
+      const setupError = U.$('#setup-error');
+      const setupNote = U.$('#setup-note');
+
+      // Open DB
+      await DB.open();
+
+      // If already signed in, redirect
+      if (Auth.session()) { window.location.replace('app.html'); return; }
+
+      // Toggle view based on whether an admin exists
+      const hasAdmin = await Auth.hasAdmin();
+      if (!hasAdmin) {
+        loginForm.classList.add('hidden');
+        setupForm.classList.remove('hidden');
+        U.$('.subtitle').textContent = 'Create your admin account to get started.';
+        U.$('.section-title h2').textContent = 'Set Up Admin';
+      } else {
+        const remember = localStorage.getItem(APP_CONFIG.rememberKey);
+        if (remember) U.$('#username').value = remember;
+      }
+
+      // Toggle password visibility
+      const pwdInput = U.$('#password');
+      const eye = U.$('#toggle-eye');
+      eye.addEventListener('click', () => {
+        const show = pwdInput.type === 'password';
+        pwdInput.type = show ? 'text' : 'password';
+        eye.textContent = show ? 'Hide' : 'Show';
+      });
+
+      function showError(el, msg) {
+        el.textContent = msg;
+        el.classList.remove('hidden');
+        el.innerHTML = `<span>⚠</span><span>${U.escape(msg)}</span>`;
+      }
+      function clearError(el) { el.classList.add('hidden'); el.textContent = ''; }
+
+      // Sign-in handler
+      loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        clearError(loginError);
+        const username = U.$('#username').value.trim();
+        const password = U.$('#password').value;
+        if (!username || !password) { showError(loginError, 'Enter both username and password.'); return; }
+        const btn = U.$('#login-btn');
+        const txt = U.$('#login-btn-text');
+        btn.disabled = true; txt.textContent = 'Signing in...';
+        try {
+          await Auth.login({ username, password });
+          if (U.$('#remember').checked) localStorage.setItem(APP_CONFIG.rememberKey, username);
+          else localStorage.removeItem(APP_CONFIG.rememberKey);
+          txt.textContent = 'Welcome!';
+          setTimeout(() => window.location.replace('app.html'), 350);
+        } catch (err) {
+          showError(loginError, err.message || 'Login failed.');
+          btn.disabled = false;
+          txt.textContent = 'Sign In Securely';
+        }
+      });
+
+      // Setup handler
+      setupForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        clearError(setupError);
+        const name = U.$('#setup-name').value.trim();
+        const username = U.$('#setup-username').value.trim();
+        const p1 = U.$('#setup-password').value;
+        const p2 = U.$('#setup-password2').value;
+        if (!name || !username || !p1) { showError(setupError, 'All fields are required.'); return; }
+        if (p1.length < 6) { showError(setupError, 'Password must be at least 6 characters.'); return; }
+        if (p1 !== p2) { showError(setupError, 'Passwords do not match.'); return; }
+        try {
+          await Auth.createAdmin({ username, password: p1, name });
+          await Auth.login({ username, password: p1 });
+          U.toast('Admin account created. Welcome!', 'success');
+          setTimeout(() => window.location.replace('app.html'), 500);
+        } catch (err) {
+          showError(setupError, err.message || 'Setup failed.');
+        }
+      });
+
+      // Forgot password — show local recovery guidance
+      U.$('#forgot-link').addEventListener('click', () => {
+        U.modal({
+          title: 'Local Account Recovery',
+          size: 'sm',
+          body: `<div style="color: var(--text-secondary); font-size: 14px; line-height: 1.6;">
+            <p>This application stores credentials locally in your browser — there is no online recovery.</p>
+            <p style="margin-top: 12px;">If you have truly forgotten your password, you can <strong>reset the admin account</strong> and create a new one. <span style="color: var(--danger); font-weight: 600;">Member records are preserved</span> — only the admin login will be reset.</p>
+            <p style="margin-top: 12px; color: var(--warning);">If you have a JSON backup, you can restore everything afterward.</p>
+          </div>`,
+          actions: [
+            { label: 'Cancel', variant: 'secondary' },
+            { label: 'Reset Admin Account', variant: 'danger', onClick: async () => {
+              if (!confirm('This will delete all admin logins so you can create a new one. Member data stays intact. Continue?')) return;
+              await Auth.recoveryWipe();
+              U.toast('Admin reset. Please set up again.', 'success');
+              setTimeout(() => location.reload(), 600);
+            } }
+          ]
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
