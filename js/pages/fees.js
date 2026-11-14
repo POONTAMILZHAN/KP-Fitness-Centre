@@ -118,27 +118,129 @@ Pages.fees = async function (outlet) {
     currentMember = member;
     lifetimePrev = payments.reduce((s, p) => s + Number(p.amount || 0), 0);
 
+    // Detect open transactions (unpaid balance on existing records)
+    const openTxns = payments.map(p => {
+      const net = Math.max(0, Number(p.totalFee || 0) - Number(p.discount || 0));
+      const received = Number(p.amount || 0);
+      const bal = net - received;
+      return { ...p, _net: net, _received: received, _bal: bal };
+    }).filter(p => p._bal > 0.005);
+
+    const totalOpen = openTxns.reduce((s, p) => s + p._bal, 0);
+
     const expired = member.expiryDate && U.diffDays(new Date(), member.expiryDate) < 0;
     const expiryBadge = expired
       ? `<span class="badge danger">Expired</span>`
       : (member.expiryDate ? `<span class="badge success">Valid till ${U.formatDate(member.expiryDate)}</span>` : '');
 
-    ctx.innerHTML = `
-      <div style="padding: 14px; background: rgba(212, 175, 55, 0.04); border: 1px solid var(--gold-border); border-radius: 10px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-        <div class="avatar">${member.photo ? `<img src="${member.photo}" alt="">` : U.initials(member.name)}</div>
-        <div style="flex: 1; min-width: 180px;">
-          <div style="font-weight: 600;">${U.escape(member.name)}</div>
-          <div style="color: var(--text-muted); font-size: 12px;">${U.escape(member.memberCode)} · ${U.escape(member.phone || '')}</div>
-          <div style="margin-top: 6px;">${expiryBadge}</div>
+    // Build open-balance EMI section
+    const emiSection = openTxns.length > 0 ? `
+      <div style="margin-top:14px; border:1px solid rgba(245,166,35,0.35); border-radius:10px; overflow:hidden;">
+        <div style="padding:10px 14px; background:rgba(245,166,35,0.1); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+          <div>
+            <span style="color:var(--warning); font-weight:700; font-size:13px;">⚠ Open Balance: ${U.money(totalOpen)}</span>
+            <span style="color:var(--text-muted); font-size:12px; margin-left:8px;">from ${openTxns.length} transaction(s)</span>
+          </div>
+          <span style="font-size:11px; color:var(--text-muted);">← Pay EMI here · New billing below</span>
         </div>
-        <div style="text-align: right;">
-          <div style="font-size: 10px; letter-spacing: 1.5px; color: var(--text-muted); text-transform: uppercase;">Lifetime paid</div>
-          <div style="color: var(--gold); font-weight: 700; font-family: var(--font-mono); font-size: 18px;">${U.money(lifetimePrev)}</div>
-          <div style="font-size: 10px; color: var(--text-muted);">${payments.length} payment(s)</div>
-        </div>
-      </div>`;
+        ${openTxns.map((p, i) => `
+          <div style="padding:12px 14px; border-bottom:1px solid rgba(255,255,255,0.05);">
+            <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; justify-content:space-between;">
+              <div>
+                <div style="font-size:11px; color:var(--text-muted);">${U.escape(p.receiptNo)} · ${U.formatDate(p.paymentDate)}</div>
+                <div style="font-size:13px; margin-top:3px;">Net Bill: <strong>${U.money(p._net)}</strong> &nbsp;·&nbsp; Paid: <strong style="color:var(--success);">${U.money(p._received)}</strong></div>
+                <div style="color:var(--warning); font-weight:700; font-size:14px; margin-top:2px;">Balance due: ${U.money(p._bal)}</div>
+              </div>
+              <button class="btn btn-primary btn-sm pay-emi-btn" data-idx="${i}">Pay EMI</button>
+            </div>
+            <div class="emi-form" data-idx="${i}" style="display:none; margin-top:12px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.07);">
+              <div class="form-grid" style="gap:10px;">
+                <div class="form-group">
+                  <label>Amount to Pay Now (max ${U.money(p._bal)})</label>
+                  <input class="input emi-amount" type="number" min="0.01" step="0.01" placeholder="Enter amount" data-max="${p._bal}">
+                </div>
+                <div class="form-group">
+                  <label>Payment Date</label>
+                  <input class="input emi-date" type="date" value="${U.today()}">
+                </div>
+                <div class="form-group">
+                  <label>Payment Method</label>
+                  <select class="select emi-method"><option>Cash</option><option>UPI</option><option>Card</option><option>Bank Transfer</option><option>Cheque</option></select>
+                </div>
+              </div>
+              <div style="display:flex; gap:8px; margin-top:10px;">
+                <button class="btn btn-primary btn-sm collect-emi-btn" data-txn-id="${p.id}" data-max="${p._bal}">Collect &amp; Receipt</button>
+                <button class="btn btn-ghost btn-sm cancel-emi-btn" data-idx="${i}">Cancel</button>
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    ` : '';
 
-    // Auto-populate plan for new transactions
+    ctx.innerHTML = `
+      <div style="padding:14px; background:rgba(212,175,55,0.04); border:1px solid var(--gold-border); border-radius:10px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+        <div class="avatar">${member.photo ? `<img src="${member.photo}" alt="">` : U.initials(member.name)}</div>
+        <div style="flex:1; min-width:180px;">
+          <div style="font-weight:600;">${U.escape(member.name)}</div>
+          <div style="color:var(--text-muted); font-size:12px;">${U.escape(member.memberCode)} · ${U.escape(member.phone || '')}</div>
+          <div style="margin-top:6px;">${expiryBadge}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:10px; letter-spacing:1.5px; color:var(--text-muted); text-transform:uppercase;">Lifetime paid</div>
+          <div style="color:var(--gold); font-weight:700; font-family:var(--font-mono); font-size:18px;">${U.money(lifetimePrev)}</div>
+          <div style="font-size:10px; color:var(--text-muted);">${payments.length} payment(s)</div>
+        </div>
+      </div>
+      ${emiSection}
+      ${openTxns.length > 0 ? `<div style="margin-top:16px; padding:8px 12px; background:rgba(255,255,255,0.03); border-radius:8px; border:1px dashed rgba(255,255,255,0.1); font-size:12px; color:var(--text-muted);">↓ New billing (creates a fresh independent transaction)</div>` : ''}
+    `;
+
+    // Wire EMI buttons
+    ctx.querySelectorAll('.pay-emi-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = btn.dataset.idx;
+        const form = ctx.querySelector(`.emi-form[data-idx="${idx}"]`);
+        const isOpen = form.style.display !== 'none';
+        ctx.querySelectorAll('.emi-form').forEach(f => { f.style.display = 'none'; });
+        if (!isOpen) form.style.display = 'block';
+      });
+    });
+
+    ctx.querySelectorAll('.cancel-emi-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        ctx.querySelector(`.emi-form[data-idx="${btn.dataset.idx}"]`).style.display = 'none';
+      });
+    });
+
+    ctx.querySelectorAll('.collect-emi-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const txnId = btn.dataset.txnId;
+        const maxBal = Number(btn.dataset.max);
+        const form = btn.closest('.emi-form');
+        const emiAmt = Number(form.querySelector('.emi-amount').value || 0);
+        const emiDate = form.querySelector('.emi-date').value;
+        const emiMethod = form.querySelector('.emi-method').value;
+
+        if (!emiAmt || emiAmt <= 0) { U.toast('Enter a valid amount.', 'error'); return; }
+        if (emiAmt > maxBal + 0.01) { U.toast(`Amount exceeds remaining balance of ${U.money(maxBal)}.`, 'error'); return; }
+
+        try {
+          btn.disabled = true;
+          const updatedPayment = await Store.addEmiPayment(txnId, emiAmt, { paymentDate: emiDate, paymentMethod: emiMethod });
+          const memberNow = await DB.get('members', id);
+          const pln = updatedPayment.planId ? planMap[updatedPayment.planId] : null;
+          U.toast('EMI collected. Receipt ready.', 'success');
+          Pages.openEmiReceipt({ payment: updatedPayment, member: memberNow, plan: pln, emiAmount: emiAmt });
+          await onMemberChange(); // refresh to show updated balances
+        } catch (e) {
+          U.toast(e.message || 'EMI collection failed.', 'error');
+          btn.disabled = false;
+        }
+      });
+    });
+
+    // Auto-populate plan for the new billing section (only if no plan pre-selected)
     if (member.planId && !planSel.value) {
       planSel.value = member.planId;
       const p = planMap[member.planId];
@@ -322,6 +424,64 @@ Pages.openReceipt = function ({ payment, member, plan, previouslyPaid = 0 }) {
 
   U.modal({
     title: 'Payment Receipt',
+    size: 'lg',
+    body,
+    actions: [
+      { label: 'Close', variant: 'secondary' },
+      { label: 'Print Receipt', variant: 'primary', closeAfter: false, onClick: () => printReceiptRoot() }
+    ]
+  });
+};
+
+// EMI receipt — shows this installment and remaining balance
+Pages.openEmiReceipt = function ({ payment, member, plan, emiAmount }) {
+  const fee = Number(payment.totalFee || 0);
+  const disc = Number(payment.discount || 0);
+  const net = Math.max(0, fee - disc);
+  const totalReceived = Number(payment.amount || 0);       // cumulative after this EMI
+  const remaining = Math.max(0, net - totalReceived);
+  const prevReceived = totalReceived - Number(emiAmount);  // before this EMI
+
+  const body = U.el('div');
+  body.innerHTML = `
+    <div class="receipt-preview" id="receipt-root">
+      <div class="receipt-head">
+        <div class="brand-mark">SKP</div>
+        <h2>${APP_CONFIG.gymName}</h2>
+        <div class="addr">${APP_CONFIG.address}</div>
+        <div class="phone">${APP_CONFIG.phone}</div>
+        <div class="label">EMI Payment Receipt</div>
+      </div>
+      <div class="receipt-meta">
+        <div class="block"><div class="l">Original Receipt</div><div class="v">${U.escape(payment.receiptNo)}</div></div>
+        <div class="block"><div class="l">Date</div><div class="v">${U.formatDate(payment.emiHistory?.at(-1)?.paymentDate || U.today())}</div></div>
+        <div class="block"><div class="l">Member</div><div class="v">${U.escape(member?.name || '-')}</div></div>
+        <div class="block"><div class="l">Member ID</div><div class="v">${U.escape(member?.memberCode || '-')}</div></div>
+      </div>
+      <div class="receipt-body">
+        <table>
+          <tr><td class="l">Plan</td><td class="v">${U.escape(plan?.name || '—')}</td></tr>
+          <tr><td class="l">Payment Method</td><td class="v">${U.escape(payment.emiHistory?.at(-1)?.paymentMethod || 'Cash')}</td></tr>
+          <tr><td class="l">Total Fee</td><td class="v">${U.money(fee)}</td></tr>
+          <tr><td class="l">Discount</td><td class="v">− ${U.money(disc)}</td></tr>
+          <tr><td class="l">Net Bill</td><td class="v">${U.money(net)}</td></tr>
+          <tr><td class="l">Previously Paid</td><td class="v">${U.money(prevReceived)}</td></tr>
+          <tr class="total"><td class="l">This EMI Payment</td><td class="v" style="color:var(--gold);">${U.money(emiAmount)}</td></tr>
+          <tr><td class="l">Total Paid So Far</td><td class="v" style="color:var(--success);">${U.money(totalReceived)}</td></tr>
+          <tr><td class="l">Remaining Balance</td><td class="v" style="color:${remaining > 0 ? 'var(--warning)' : 'var(--success)'};">${remaining > 0 ? U.money(remaining) : '✓ Fully Paid'}</td></tr>
+          ${payment.validFrom ? `<tr><td class="l">Valid From</td><td class="v">${U.formatDate(payment.validFrom)}</td></tr>` : ''}
+          ${payment.validTill ? `<tr><td class="l">Valid Till</td><td class="v">${U.formatDate(payment.validTill)}</td></tr>` : ''}
+        </table>
+      </div>
+      <div class="receipt-footer">
+        <div class="thanks">Thank You for Your Payment</div>
+        <div>Stay Strong · Train Hard · Transform Your Life</div>
+        <div class="hours">${APP_CONFIG.hoursText}</div>
+      </div>
+    </div>`;
+
+  U.modal({
+    title: 'EMI Receipt',
     size: 'lg',
     body,
     actions: [

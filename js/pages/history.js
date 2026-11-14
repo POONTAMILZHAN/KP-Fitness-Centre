@@ -68,17 +68,25 @@ Pages.history = async function (outlet) {
       return;
     }
     let html = `<div class="table-scroll"><table class="data-table">
-      <thead><tr><th>Date</th><th>Receipt</th><th>Member</th><th>Method</th><th class="num">Fee</th><th class="num">Disc</th><th class="num">Received</th><th></th></tr></thead><tbody>`;
+      <thead><tr><th>Date</th><th>Receipt</th><th>Member</th><th>Method</th><th class="num">Net Bill</th><th class="num">Received</th><th class="num">Balance</th><th></th></tr></thead><tbody>`;
     paging.items.forEach(p => {
       const m = memberMap[p.memberId];
+      const net = Math.max(0, Number(p.totalFee || 0) - Number(p.discount || 0));
+      const received = Number(p.amount || 0);
+      const balance = Math.max(0, net - received);
+      const hasEmi = p.emiHistory && p.emiHistory.length > 0;
+      const balColor = balance > 0 ? 'var(--warning)' : 'var(--success)';
       html += `<tr>
         <td>${U.formatDate(p.paymentDate)}</td>
-        <td style="font-family: var(--font-mono); color: var(--gold);">${U.escape(p.receiptNo)}</td>
+        <td style="font-family: var(--font-mono); color: var(--gold);">
+          ${U.escape(p.receiptNo)}
+          ${hasEmi ? `<span class="badge gold" style="font-size:9px; margin-left:4px;">EMI ×${p.emiHistory.length}</span>` : ''}
+        </td>
         <td><div style="font-weight: 600;">${U.escape(m?.name || '-')}</div><div style="font-size: 11px; color: var(--text-muted);">${U.escape(m?.memberCode || '')}</div></td>
         <td><span class="badge grey">${U.escape(p.paymentMethod || 'Cash')}</span></td>
-        <td class="num">${U.money(p.totalFee || 0)}</td>
-        <td class="num" style="color: var(--warning);">${U.money(p.discount || 0)}</td>
-        <td class="num" style="color: var(--gold); font-weight: 700;">${U.money(p.amount)}</td>
+        <td class="num">${U.money(net)}</td>
+        <td class="num" style="color: var(--gold); font-weight: 700;">${U.money(received)}</td>
+        <td class="num" style="color: ${balColor}; font-weight: 600;">${balance > 0 ? U.money(balance) : '✓'}</td>
         <td><button class="btn btn-ghost btn-sm" data-print="${p.id}">${U.icon('print')} Print</button></td>
       </tr>`;
     });

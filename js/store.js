@@ -84,6 +84,28 @@
   };
 
   // ---------- Payments ----------
+
+  // Add an EMI installment against an existing open payment record.
+  // Increases p.amount in-place and appends to p.emiHistory for audit.
+  Store.addEmiPayment = async function (paymentId, emiAmount, { paymentDate, paymentMethod } = {}) {
+    const payment = await DB.get('payments', paymentId);
+    if (!payment) throw new Error('Original payment record not found.');
+    const net = Math.max(0, Number(payment.totalFee || 0) - Number(payment.discount || 0));
+    const prevReceived = Number(payment.amount || 0);
+    const remaining = net - prevReceived;
+    if (Number(emiAmount) > remaining + 0.01) throw new Error(`EMI amount exceeds remaining balance of ${remaining}.`);
+    payment.amount = prevReceived + Number(emiAmount);
+    if (!payment.emiHistory) payment.emiHistory = [];
+    payment.emiHistory.push({
+      amount: Number(emiAmount),
+      paymentDate: paymentDate || U.today(),
+      paymentMethod: paymentMethod || 'Cash',
+      paidAt: new Date().toISOString()
+    });
+    await DB.put('payments', payment);
+    return payment;
+  };
+
   Store.recordPayment = async function (p) {
     if (!p.id) {
       p.id = DB.uid();
