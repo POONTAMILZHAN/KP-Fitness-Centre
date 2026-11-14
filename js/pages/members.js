@@ -24,7 +24,7 @@ Pages.members = async function (outlet, params) {
       <select class="select" id="status-filter" style="max-width: 200px;">
         <option value="all">All status</option>
         <option value="Active">Active</option>
-        <option value="Upcoming">Upcoming Due</option>
+        <option value="Upcoming">Expiring Soon</option>
         <option value="Expired">Expired</option>
       </select>
     </div>
@@ -215,16 +215,27 @@ async function openMemberForm(id) {
   const planSel = body.querySelector('[name="planId"]');
   const joiningInp = body.querySelector('[name="joiningDate"]');
   const expiryInp = body.querySelector('[name="expiryDate"]');
-  const recalc = () => {
+
+  // BUG-01 fix: in edit mode, plan change → start from TODAY (renewal),
+  // not from joining date (which may be months/years ago).
+  // Joining date change → still recalcs from that date (admin is adjusting record).
+  const recalc = (source = 'joining') => {
     const opt = planSel.selectedOptions[0];
     if (!opt || !opt.dataset.months) return;
-    const m = Number(opt.dataset.months);
-    const start = joiningInp.value || U.today();
-    expiryInp.value = U.toInputDate(U.addMonths(start, m));
+    const months = Number(opt.dataset.months);
+    let start;
+    if (source === 'plan' && member.id) {
+      // Existing member changed their plan → effective today
+      start = U.today();
+    } else {
+      start = joiningInp.value || U.today();
+    }
+    expiryInp.value = U.toInputDate(U.addMonths(start, months));
   };
-  planSel.addEventListener('change', recalc);
-  joiningInp.addEventListener('change', recalc);
-  if (!member.id) setTimeout(recalc, 10);
+  planSel.addEventListener('change', () => recalc('plan'));
+  joiningInp.addEventListener('change', () => recalc('joining'));
+  // For NEW members, auto-calc on load; edit mode keeps existing expiry unless plan changes
+  if (!member.id) setTimeout(() => recalc('joining'), 10);
 
   let photoData = member.photo || '';
   body.querySelector('[name="photo"]').addEventListener('change', (e) => {
@@ -243,14 +254,41 @@ async function openMemberForm(id) {
       { label: 'Cancel', variant: 'secondary' },
       { label: id ? 'Save Changes' : 'Create Member', variant: 'primary', closeAfter: false, onClick: async () => {
         const data = Object.fromEntries(Array.from(body.querySelectorAll('[name]')).map(i => [i.name, i.value.trim()]));
-        if (!data.name || !data.phone || !data.planId) { U.toast('Fill required fields.', 'error'); return; }
+
+        // BUG-09 fix: specific field-level messages
+        if (!data.name) { U.toast('Full Name is required.', 'error'); return; }
+        if (!data.phone) { U.toast('Mobile Number is required.', 'error'); return; }
+        if (!data.planId) { U.toast('Membership Plan is required.', 'error'); return; }
+        if (!data.joiningDate) { U.toast('Joining Date is required.', 'error'); return; }
+
+        // BUG-04 fix: 10-digit phone validation
+        const digits = data.phone.replace(/\D/g, '');
+        if (digits.length !== 10) { U.toast('Enter a valid 10-digit mobile number.', 'error'); return; }
+
+        // BUG-05 fix: joining date must be before expiry date
+        if (data.joiningDate && data.expiryDate && data.joiningDate >= data.expiryDate) {
+          U.toast('Expiry Date must be after Joining Date.', 'error'); return;
+        }
+
+        // BUG-08 fix: warn if changing plan on an active member
+        if (id && data.planId !== member.planId && member.expiryDate) {
+          const daysLeft = U.diffDays(new Date(), member.expiryDate);
+          if (daysLeft >= 0) {
+            const ok = await U.confirm(
+              `This member's current plan is still active for ${daysLeft} more day(s) (expires ${U.formatDate(member.expiryDate)}).\n\nChanging the plan will recalculate their expiry from today. Continue?`,
+              'Plan Change on Active Member'
+            );
+            if (!ok) return;
+          }
+        }
+
         const plan = plans.find(p => p.id === data.planId);
         const payload = {
           ...member,
           ...data,
           photo: photoData || member.photo || '',
-          planName: plan?.name,
-          planPrice: plan?.price
+          planName: plan?.name || '',
+          planPrice: plan?.price || 0
         };
         await Store.saveMember(payload);
         U.toast(id ? 'Member updated.' : 'Member created successfully.', 'success');

@@ -193,7 +193,18 @@ Pages.fees = async function (outlet) {
         </div>
       </div>
       ${emiSection}
-      ${openTxns.length > 0 ? `<div style="margin-top:16px; padding:8px 12px; background:rgba(255,255,255,0.03); border-radius:8px; border:1px dashed rgba(255,255,255,0.1); font-size:12px; color:var(--text-muted);">↓ New billing (creates a fresh independent transaction)</div>` : ''}
+      ${(() => {
+        // BUG-02 / BUG-06 fix: show active-plan status on the new billing divider
+        if (!member.expiryDate) return '';
+        const daysLeft = U.diffDays(new Date(), member.expiryDate);
+        if (daysLeft >= 0) {
+          return `<div style="margin-top:14px; padding:10px 14px; background:rgba(76,175,80,0.07); border:1px solid rgba(76,175,80,0.25); border-radius:8px; font-size:12px; color:var(--success);">
+            ✓ Plan active — expires in <strong>${daysLeft} day(s)</strong> (${U.formatDate(member.expiryDate)})
+            <span style="color:var(--warning);margin-left:10px;">⚠ Creating new billing now will overlap with the active plan.</span>
+          </div>`;
+        }
+        return `<div style="margin-top:12px; padding:8px 12px; background:rgba(255,255,255,0.03); border-radius:8px; border:1px dashed rgba(255,255,255,0.1); font-size:12px; color:var(--text-muted);">↓ New billing (creates a fresh independent transaction)</div>`;
+      })()}
     `;
 
     // Wire EMI buttons
@@ -330,6 +341,25 @@ Pages.fees = async function (outlet) {
     const amount = Math.max(0, Number(amountIn.value || 0));
     if (amount <= 0) { U.toast('Enter an amount greater than zero.', 'error'); return; }
     if (disc > fee) { U.toast('Discount cannot exceed total fee.', 'error'); return; }
+
+    // BUG-03 fix: validFrom must be before validTill
+    const vFrom = $$('#cycle-start').value;
+    const vTill = $$('#cycle-end').value;
+    if (vFrom && vTill && vFrom > vTill) {
+      U.toast('Valid From date cannot be after Valid Till date.', 'error'); return;
+    }
+
+    // BUG-02 fix: warn if creating new billing while plan is still active
+    if (currentMember?.expiryDate) {
+      const daysLeft = U.diffDays(new Date(), currentMember.expiryDate);
+      if (daysLeft >= 0) {
+        const ok = await U.confirm(
+          `This member's plan is still active for ${daysLeft} more day(s) (expires ${U.formatDate(currentMember.expiryDate)}).\n\nIf they want to pay an EMI instalment, use the "Pay EMI" section above instead.\n\nCreate a NEW billing anyway?`,
+          'Active Plan — Confirm New Billing'
+        );
+        if (!ok) return;
+      }
+    }
 
     const planId = planSel.value || null;
 
